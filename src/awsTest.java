@@ -2,10 +2,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.*;
 
 import java.util.Scanner;
 
@@ -16,6 +13,7 @@ public class awsTest {
      * Chungbuk National University
      */
     static AmazonEC2 ec2;
+    //Scanner scanner = new Scanner(System.in);
 
     private static void init() throws Exception {
         /*
@@ -71,8 +69,8 @@ public class awsTest {
     public static void main(String[] args) throws Exception {
         init();
         Scanner menu = new Scanner(System.in);
-        Scanner id_string = new Scanner(System.in);
-        int number = 0;
+        //Scanner id_string = new Scanner(System.in);
+        //int number = 0;
         while (true) {
             System.out.println("                                                            ");
             System.out.println("                                                            ");
@@ -94,10 +92,24 @@ public class awsTest {
                 case 1:
                     listInstances();
                     break;
+                case 3:
+                    startInstances();
+                    break;
                 case 99:
+                    System.exit(0);
                     break;
             }
             //break;
         }
+    }
+
+    public static void startInstances() {
+        Scanner scanner = new Scanner((System.in));
+        System.out.print("Enter instances id: ");
+        String InstanceId = scanner.next();
+        System.out.println("Strating..." + InstanceId);
+        StartInstancesRequest request = new StartInstancesRequest().withInstanceIds(InstanceId);
+        ec2.startInstances((request));
+        System.out.println("Successfully started instnace"+InstanceId);
     }
 }
