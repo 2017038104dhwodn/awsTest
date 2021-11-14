@@ -98,6 +98,12 @@ public class awsTest {
                 case 5:
                     stopInstances();
                     break;
+                case 6:
+                    CreateInstances();
+                    break;
+                case 7:
+                    rebootInstances();
+                    break;
                 case 99:
                     System.exit(0);
                     break;
@@ -106,13 +112,38 @@ public class awsTest {
         }
     }
 
+    public static void CreateInstances() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter ami id: ");
+        String amiId = scanner.next();
+        RunInstancesRequest runInstancesRequest = new RunInstancesRequest()
+                .withImageId(amiId)
+                .withInstanceType(InstanceType.T2Micro)
+                .withMaxCount(1)
+                .withMinCount(1);
+        RunInstancesResult run_response = ec2.runInstances((runInstancesRequest));
+        String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
+
+        System.out.println("Successfully started EC2 instance "+reservation_id+"based on AMI "+amiId);
+    }
+
+    public static void rebootInstances() {
+        Scanner scanner = new Scanner((System.in));
+        System.out.print("Enter instances id: ");
+        String InstanceId = scanner.next();
+        System.out.println("Rebooting... "+InstanceId);
+        RebootInstancesRequest request = new RebootInstancesRequest().withInstanceIds(InstanceId);
+        RebootInstancesResult response = ec2.rebootInstances(request);
+        System.out.println("Successfully reboot instnace..."+InstanceId);
+    }
+
     public static void stopInstances() {
         Scanner scanner = new Scanner((System.in));
         System.out.print("Enter instances id: ");
         String InstanceId = scanner.next();
         System.out.println("Stopping... "+InstanceId);
-        StopInstancesRequest request2 = new StopInstancesRequest().withInstanceIds(InstanceId);
-        ec2.stopInstances(request2);
+        StopInstancesRequest request = new StopInstancesRequest().withInstanceIds(InstanceId);
+        ec2.stopInstances(request);
         System.out.println("Successfully stop instnace..."+InstanceId);
     }
 
