@@ -98,6 +98,9 @@ public class awsTest {
                 case 3:
                     startInstances();
                     break;
+                case 4:
+                    availableRegions();
+                    break;
                 case 5:
                     stopInstances();
                     break;
@@ -107,11 +110,28 @@ public class awsTest {
                 case 7:
                     rebootInstances();
                     break;
+                case 8:
+                    listImages();
+                    break;
                 case 99:
                     System.exit(0);
                     break;
             }
             //break;
+        }
+    }
+
+    public static void listImages() {
+
+    }
+
+    public static void availableRegions() {
+        DescribeRegionsResult regionsResult = ec2.describeRegions();
+
+        for (Region region : regionsResult.getRegions()) {
+            System.out.printf(
+                    "[region] %15s,  [endpoint] %s \n", region.getRegionName(), region.getEndpoint()
+            );
         }
     }
 
