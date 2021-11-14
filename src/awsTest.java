@@ -92,6 +92,9 @@ public class awsTest {
                 case 1:
                     listInstances();
                     break;
+                case 2:
+                    availableZones();
+                    break;
                 case 3:
                     startInstances();
                     break;
@@ -109,6 +112,24 @@ public class awsTest {
                     break;
             }
             //break;
+        }
+    }
+
+    public static void availableZones() {
+        DescribeAvailabilityZonesResult zonesResult = ec2.describeAvailabilityZones();
+
+        for(AvailabilityZone zone: zonesResult.getAvailabilityZones()) {
+            System.out.printf(
+                    "[id] %s "+
+                       "[region] %s "+
+                       "[zone] %s " +
+                       "[state] %s",
+                    zone.getZoneId(),
+                    zone.getRegionName(),
+                    zone.getZoneName(),
+                    zone.getState()
+            );
+            System.out.println();
         }
     }
 
