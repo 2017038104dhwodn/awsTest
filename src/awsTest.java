@@ -95,12 +95,25 @@ public class awsTest {
                 case 3:
                     startInstances();
                     break;
+                case 5:
+                    stopInstances();
+                    break;
                 case 99:
                     System.exit(0);
                     break;
             }
             //break;
         }
+    }
+
+    public static void stopInstances() {
+        Scanner scanner = new Scanner((System.in));
+        System.out.print("Enter instances id: ");
+        String InstanceId = scanner.next();
+        System.out.println("Stopping... "+InstanceId);
+        StopInstancesRequest request2 = new StopInstancesRequest().withInstanceIds(InstanceId);
+        ec2.stopInstances(request2);
+        System.out.println("Successfully stop instnace..."+InstanceId);
     }
 
     public static void startInstances() {
@@ -111,5 +124,6 @@ public class awsTest {
         StartInstancesRequest request = new StartInstancesRequest().withInstanceIds(InstanceId);
         ec2.startInstances((request));
         System.out.println("Successfully started instnace"+InstanceId);
+        //scanner.close();
     }
 }
