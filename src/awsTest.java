@@ -3,6 +3,11 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.imagebuilder.model.Ami;
+import com.amazonaws.services.imagebuilder.model.GetImageRequest;
+import com.amazonaws.services.imagebuilder.model.GetImageResult;
+import com.amazonaws.services.sagemaker.model.DescribeImageRequest;
+import com.amazonaws.services.sagemaker.model.DescribeImageResult;
 
 import java.util.Scanner;
 
@@ -122,7 +127,17 @@ public class awsTest {
     }
 
     public static void listImages() {
-
+        /*System.out.println("Listing AMI Images...");
+        DescribeImagesRequest describeImagesRequest = new DescribeImagesRequest();
+        DescribeImagesResult describeImagesResult = ec2.describeImages(describeImagesRequest);
+        for(Image ami: describeImagesResult.getImages()) {
+            System.out.printf("[name] %s", ami.getName());
+        }*/
+        DescribeImagesRequest request = new DescribeImagesRequest().withOwners("self");
+        DescribeImagesResult imagesResult = ec2.describeImages(request);
+        for (Image image: imagesResult.getImages()) {
+            System.out.printf("[name] %15s [id] %15s [Owner] %15s\n", image.getName(), image.getImageId(), image.getOwnerId());
+        }
     }
 
     public static void availableRegions() {
