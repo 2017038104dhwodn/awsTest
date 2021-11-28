@@ -89,7 +89,7 @@ public class awsTest {
             System.out.println("  5. stop instance                6. create instance        ");
             System.out.println("  7. reboot instance              8. list images            ");
             System.out.println("  9. condor_status                10. run instance and command");
-            System.out.println("                                  99. quit                   ");
+            System.out.println("  11. create Image                99. quit                   ");
             System.out.println("------------------------------------------------------------");
             System.out.print("Enter an integer: ");
 
@@ -124,12 +124,29 @@ public class awsTest {
                 case 10:
                     RunCommand();
                     break;
+                case 11:
+                    createImage();
+                    break;
                 case 99:
                     System.exit(0);
                     break;
             }
             //break;
         }
+    }
+
+    public static void createImage() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Instance id: ");
+        String InstanceId = scanner.next();
+        CreateImageRequest createImageRequest = new CreateImageRequest();
+        createImageRequest.setInstanceId(InstanceId);
+        System.out.print("Enter Ami name: ");
+        String AmiId = scanner.next();
+        createImageRequest.setName(AmiId);
+        CreateImageResult createImageResult = ec2.createImage(createImageRequest);
+        String createdImageId = createImageResult.getImageId();
+        System.out.println("Successfully started EC2 AMIs "+createdImageId+"based on Instance "+InstanceId);
     }
 
     public static void RunCommand() throws JSchException, IOException, InterruptedException {
@@ -176,7 +193,7 @@ public class awsTest {
         JSch.setConfig("StrictHostKeyChecking", "no");
 
 //enter your own EC2 instance IP here
-        Session session=jsch.getSession("ec2-user", "18", 22);
+        Session session=jsch.getSession("ec2-user", "18.116.21.120", 22);
         session.connect();
 
 //run stuff
