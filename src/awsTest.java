@@ -3,13 +3,12 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.*;
-import com.amazonaws.services.imagebuilder.model.Ami;
-import com.amazonaws.services.imagebuilder.model.GetImageRequest;
-import com.amazonaws.services.imagebuilder.model.GetImageResult;
-import com.amazonaws.services.sagemaker.model.DescribeImageRequest;
-import com.amazonaws.services.sagemaker.model.DescribeImageResult;
+import com.jcraft.jsch.*;
+import java.io.*;
 
 import java.util.Scanner;
+
+import static java.lang.Thread.sleep;
 
 public class awsTest {
     /*
@@ -89,7 +88,8 @@ public class awsTest {
             System.out.println("  3. start instance               4. available regions      ");
             System.out.println("  5. stop instance                6. create instance        ");
             System.out.println("  7. reboot instance              8. list images            ");
-            System.out.println("                                 99. quit                   ");
+            System.out.println("  9. condor_status                10. run instance and command");
+            System.out.println("                                  99. quit                   ");
             System.out.println("------------------------------------------------------------");
             System.out.print("Enter an integer: ");
 
@@ -118,6 +118,12 @@ public class awsTest {
                 case 8:
                     listImages();
                     break;
+                case 9:
+                    condor_status();
+                    break;
+                case 10:
+                    RunCommand();
+                    break;
                 case 99:
                     System.exit(0);
                     break;
@@ -126,13 +132,81 @@ public class awsTest {
         }
     }
 
+    public static void RunCommand() throws JSchException, IOException, InterruptedException {
+        Scanner scanner = new Scanner(System.in);
+        JSch jsch=new JSch();
+        jsch.addIdentity("/home/dhwodnojw/.ssh/HTCondorSecurity.pem");
+        JSch.setConfig("StrictHostKeyChecking", "no");
+
+//enter your own EC2 instance IP here
+        Session session=jsch.getSession("ec2-user", "18.116.21.120", 22);
+        session.connect();
+
+//run stuff
+        System.out.print("Write Command: ");
+        //String command;
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setCommand(scanner.next());
+        channel.setErrStream(System.err);
+        channel.connect();
+
+        InputStream input = channel.getInputStream();
+//start reading the input from the executed commands on the shell
+        byte[] tmp = new byte[1024];
+        while (true) {
+            while (input.available() > 0) {
+                int i = input.read(tmp, 0, 1024);
+                if (i < 0) break;
+                System.out.print(new String(tmp, 0, i));
+            }
+            if (channel.isClosed()){
+                System.out.println("exit-status: " + channel.getExitStatus());
+                break;
+            }
+            sleep(1000);
+        }
+
+        channel.disconnect();
+        session.disconnect();
+    }
+
+    public static void condor_status() throws JSchException, IOException, InterruptedException {
+        JSch jsch=new JSch();
+        jsch.addIdentity("/home/dhwodnojw/.ssh/HTCondorSecurity.pem");
+        JSch.setConfig("StrictHostKeyChecking", "no");
+
+//enter your own EC2 instance IP here
+        Session session=jsch.getSession("ec2-user", "18", 22);
+        session.connect();
+
+//run stuff
+        String command = "condor_status";
+        ChannelExec channel = (ChannelExec) session.openChannel("exec");
+        channel.setCommand(command);
+        channel.setErrStream(System.err);
+        channel.connect();
+
+        InputStream input = channel.getInputStream();
+//start reading the input from the executed commands on the shell
+        byte[] tmp = new byte[1024];
+        while (true) {
+            while (input.available() > 0) {
+                int i = input.read(tmp, 0, 1024);
+                if (i < 0) break;
+                System.out.print(new String(tmp, 0, i));
+            }
+            if (channel.isClosed()){
+                System.out.println("exit-status: " + channel.getExitStatus());
+                break;
+            }
+            sleep(1000);
+        }
+
+        channel.disconnect();
+        session.disconnect();
+    }
+
     public static void listImages() {
-        /*System.out.println("Listing AMI Images...");
-        DescribeImagesRequest describeImagesRequest = new DescribeImagesRequest();
-        DescribeImagesResult describeImagesResult = ec2.describeImages(describeImagesRequest);
-        for(Image ami: describeImagesResult.getImages()) {
-            System.out.printf("[name] %s", ami.getName());
-        }*/
         DescribeImagesRequest request = new DescribeImagesRequest().withOwners("self");
         DescribeImagesResult imagesResult = ec2.describeImages(request);
         for (Image image: imagesResult.getImages()) {
