@@ -50,7 +50,7 @@ public class awsTest {
             for (Reservation reservation : response.getReservations()) {
                 for (Instance instance : reservation.getInstances()) {
                     System.out.printf(
-                            "[id] %s, " +
+                                    "[id] %s, " +
                                     "[AMI] %s, " +
                                     "[type] %s, " +
                                     "[state] %10s, " +
@@ -127,12 +127,26 @@ public class awsTest {
                 case 11:
                     createImage();
                     break;
+                case 12:
+                    terminateInstance();
+                    break;
                 case 99:
                     System.exit(0);
                     break;
             }
             //break;
         }
+    }
+
+    public static void terminateInstance() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Instance id: ");
+        String InstanceId = scanner.next();
+
+        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
+        ec2.terminateInstances(terminateInstancesRequest.withInstanceIds(InstanceId));
+
+        System.out.println("Successfully terminated EC2 instance "+InstanceId);
     }
 
     public static void createImage() {
@@ -267,11 +281,12 @@ public class awsTest {
                 .withImageId(amiId)
                 .withInstanceType(InstanceType.T2Micro)
                 .withMaxCount(1)
-                .withMinCount(1);
+                .withMinCount(1)
+                ;
         RunInstancesResult run_response = ec2.runInstances((runInstancesRequest));
         String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
 
-        System.out.println("Successfully started EC2 instance "+reservation_id+"based on AMI "+amiId);
+        System.out.println("Successfully started EC2 instance "+reservation_id+" based on AMI "+amiId);
     }
 
     public static void rebootInstances() {
