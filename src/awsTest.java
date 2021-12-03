@@ -1,10 +1,10 @@
-import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonClientException; //Aws API
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.*;
-import com.jcraft.jsch.*;
-import java.io.*;
+import com.jcraft.jsch.*;   //SSH client api
+import java.io.*;   //file return
 
 import java.util.Scanner;
 
@@ -16,16 +16,15 @@ public class awsTest {
      * Department of Computer Science
      * Chungbuk National University
      */
-    static AmazonEC2 ec2;
-    //Scanner scanner = new Scanner(System.in);
+    static AmazonEC2 ec2;   //AWS EC2 Module
 
-    private static void init() throws Exception {
+    private static void init() throws Exception {   //verify my personal information
         /*
          * The ProfileCredentialsProvider will return your [default]
          * credential profile by reading from the credentials file located at
          * (~/.aws/credentials).
          */
-        ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
+        ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();  //get my aws key
         try {
             credentialsProvider.getCredentials();
         } catch (Exception e) {
@@ -35,13 +34,13 @@ public class awsTest {
                             "location (~/.aws/credentials), and is in valid format.",
                     e);
         }
-        ec2 = AmazonEC2ClientBuilder.standard()
+        ec2 = AmazonEC2ClientBuilder.standard() //set my region
                 .withCredentials(credentialsProvider)
                 .withRegion("us-east-2") /* check the region at AWS console */
                 .build();
     }
 
-    public static void listInstances() {
+    public static void listInstances() {    //List my ec2 Instance
         System.out.println("Listing instances....");
         boolean done = false;
         DescribeInstancesRequest request = new DescribeInstancesRequest();
@@ -70,11 +69,9 @@ public class awsTest {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        init();
+    public static void main(String[] args) throws Exception {   //main function
+        init(); //you can use aws to manage instances and images dynamically
         Scanner menu = new Scanner(System.in);
-        //Scanner id_string = new Scanner(System.in);
-        //int number = 0;
         while (true) {
             System.out.println("                                                            ");
             System.out.println("                                                            ");
@@ -89,11 +86,12 @@ public class awsTest {
             System.out.println("  5. stop instance                6. create instance        ");
             System.out.println("  7. reboot instance              8. list images            ");
             System.out.println("  9. condor_status                10. run instance and command");
-            System.out.println("  11. create Image                99. quit                   ");
+            System.out.println("  11. create Image                12. terminate instance");
+            System.out.println("  99. quit                   ");
             System.out.println("------------------------------------------------------------");
             System.out.print("Enter an integer: ");
 
-            switch (menu.nextInt()) {
+            switch (menu.nextInt()) {   //If you choose number, the number's function will execute.
                 case 1:
                     listInstances();
                     break;
@@ -138,7 +136,7 @@ public class awsTest {
         }
     }
 
-    public static void terminateInstance() {
+    public static void terminateInstance() {    //Terminate your instance
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Instance id: ");
         String InstanceId = scanner.next();
@@ -149,7 +147,7 @@ public class awsTest {
         System.out.println("Successfully terminated EC2 instance "+InstanceId);
     }
 
-    public static void createImage() {
+    public static void createImage() {  //Create an image based on your existing instances
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Instance id: ");
         String InstanceId = scanner.next();
@@ -163,10 +161,10 @@ public class awsTest {
         System.out.println("Successfully started EC2 AMIs "+createdImageId+"based on Instance "+InstanceId);
     }
 
-    public static void RunCommand() throws JSchException, IOException, InterruptedException {
-        Scanner scanner = new Scanner(System.in);
-        JSch jsch=new JSch();
-        jsch.addIdentity("/home/dhwodnojw/.ssh/HTCondorSecurity.pem");
+    public static void RunCommand() throws JSchException, IOException, InterruptedException {   //you can use command line through this console
+        Scanner scanner = new Scanner(System.in);   //but, you have one chances.
+        JSch jsch=new JSch();   //If you want more results, you should execute "Runcommand" or Enter 10
+        jsch.addIdentity("/home/dhwodnojw/.ssh/HTCondorSecurity.pem");  //my ssh key. only can use my pc.
         JSch.setConfig("StrictHostKeyChecking", "no");
 
 //enter your own EC2 instance IP here
@@ -185,7 +183,7 @@ public class awsTest {
 //start reading the input from the executed commands on the shell
         byte[] tmp = new byte[1024];
         while (true) {
-            while (input.available() > 0) {
+            while (input.available() > 0) { //command result
                 int i = input.read(tmp, 0, 1024);
                 if (i < 0) break;
                 System.out.print(new String(tmp, 0, i));
@@ -197,11 +195,11 @@ public class awsTest {
             sleep(1000);
         }
 
-        channel.disconnect();
+        channel.disconnect();   //disconnect ssh
         session.disconnect();
     }
 
-    public static void condor_status() throws JSchException, IOException, InterruptedException {
+    public static void condor_status() throws JSchException, IOException, InterruptedException {    //same description of RunCommand()
         JSch jsch=new JSch();
         jsch.addIdentity("/home/dhwodnojw/.ssh/HTCondorSecurity.pem");
         JSch.setConfig("StrictHostKeyChecking", "no");
@@ -237,7 +235,7 @@ public class awsTest {
         session.disconnect();
     }
 
-    public static void listImages() {
+    public static void listImages() {   //List my images
         DescribeImagesRequest request = new DescribeImagesRequest().withOwners("self");
         DescribeImagesResult imagesResult = ec2.describeImages(request);
         for (Image image: imagesResult.getImages()) {
@@ -245,7 +243,7 @@ public class awsTest {
         }
     }
 
-    public static void availableRegions() {
+    public static void availableRegions() { //list your available regions that can use your resources
         DescribeRegionsResult regionsResult = ec2.describeRegions();
 
         for (Region region : regionsResult.getRegions()) {
@@ -255,7 +253,7 @@ public class awsTest {
         }
     }
 
-    public static void availableZones() {
+    public static void availableZones() {   //list your available zones that can use your resources
         DescribeAvailabilityZonesResult zonesResult = ec2.describeAvailabilityZones();
 
         for(AvailabilityZone zone: zonesResult.getAvailabilityZones()) {
@@ -273,7 +271,7 @@ public class awsTest {
         }
     }
 
-    public static void CreateInstances() {
+    public static void CreateInstances() {  //Create your instance based on existing your AMIs.
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter ami id: ");
         String amiId = scanner.next();
@@ -289,7 +287,7 @@ public class awsTest {
         System.out.println("Successfully started EC2 instance "+reservation_id+" based on AMI "+amiId);
     }
 
-    public static void rebootInstances() {
+    public static void rebootInstances() {  //Reboot your instances
         Scanner scanner = new Scanner((System.in));
         System.out.print("Enter instances id: ");
         String InstanceId = scanner.next();
@@ -299,7 +297,7 @@ public class awsTest {
         System.out.println("Successfully reboot instnace..."+InstanceId);
     }
 
-    public static void stopInstances() {
+    public static void stopInstances() {    //Stopping your instances
         Scanner scanner = new Scanner((System.in));
         System.out.print("Enter instances id: ");
         String InstanceId = scanner.next();
@@ -309,7 +307,7 @@ public class awsTest {
         System.out.println("Successfully stop instnace..."+InstanceId);
     }
 
-    public static void startInstances() {
+    public static void startInstances() {   //Start your instances
         Scanner scanner = new Scanner((System.in));
         System.out.print("Enter instances id: ");
         String InstanceId = scanner.next();
